@@ -136,6 +136,7 @@ from langchain.document_loaders.pdf import (
     PyPDFLoader,
     UnstructuredPDFLoader,
 )
+from langchain.document_loaders.pipeline import DocumentPipeline
 from langchain.document_loaders.polars_dataframe import PolarsDataFrameLoader
 from langchain.document_loaders.powerpoint import UnstructuredPowerPointLoader
 from langchain.document_loaders.psychic import PsychicLoader
@@ -244,12 +245,13 @@ __all__ = [
     "ConcurrentLoader",
     "ConfluenceLoader",
     "CubeSemanticLoader",
-    "DataFrameLoader",
     "DatadogLogsLoader",
+    "DataFrameLoader",
     "DiffbotLoader",
     "DirectoryLoader",
     "DiscordChatLoader",
     "DocugamiLoader",
+    "DocumentPipeline",
     "Docx2txtLoader",
     "DropboxLoader",
     "DuckDBLoader",
