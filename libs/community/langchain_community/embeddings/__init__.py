@@ -69,6 +69,7 @@ from langchain_community.embeddings.nlpcloud import NLPCloudEmbeddings
 from langchain_community.embeddings.oci_generative_ai import OCIGenAIEmbeddings
 from langchain_community.embeddings.octoai_embeddings import OctoAIEmbeddings
 from langchain_community.embeddings.ollama import OllamaEmbeddings
+from langchain_community.embeddings.onnx_embeddings import ONNXEmbeddings
 from langchain_community.embeddings.openai import OpenAIEmbeddings
 from langchain_community.embeddings.sagemaker_endpoint import (
     SagemakerEndpointEmbeddings,
@@ -148,6 +149,7 @@ __all__ = [
     "BookendEmbeddings",
     "VolcanoEmbeddings",
     "OCIGenAIEmbeddings",
+    "ONNXEmbeddings",
 ]
 
 
