@@ -89,7 +89,9 @@ def split_string(input_str, limit, sep=" "):
 
     # Check if any single word exceeds the limit, which is not allowed
     if max(map(len, words)) > limit:
-        raise ValueError("A single word exceeds the limit, making splitting impossible.")
+        raise ValueError(
+            "A single word exceeds the limit, making splitting impossible."
+        )
 
     # Initialize the result list, the current part being constructed, and the remaining words
     res = []  # List to store the final result of split parts
@@ -117,7 +119,9 @@ def split_string(input_str, limit, sep=" "):
 def add_chunk(sentences, start_index, end_index, chunks, max_chunk_size):
     """Adds sentences as a chunk if their total length does not exceed max_chunk_size."""
     if not max_chunk_size:
-        combined_text = " ".join([d["sentence"] for d in sentences[start_index : end_index]])
+        combined_text = " ".join(
+            [d["sentence"] for d in sentences[start_index:end_index]]
+        )
         chunks.append(combined_text)
     else:
         group = []
@@ -150,7 +154,12 @@ class SemanticChunker(BaseDocumentTransformer):
     sentences, and then merges one that are similar in the embedding space.
     """
 
-    def __init__(self, embeddings: Embeddings, add_start_index: bool = False, max_chunk_size: int = None):
+    def __init__(
+        self,
+        embeddings: Embeddings,
+        add_start_index: bool = False,
+        max_chunk_size: int = None,
+    ):
         self._add_start_index = add_start_index
         self.embeddings = embeddings
         self.max_chunk_size = max_chunk_size
@@ -166,7 +175,6 @@ class SemanticChunker(BaseDocumentTransformer):
             return single_sentences_list
 
         if self.max_chunk_size:
-
             # Preparing a new list to store the results
             new_single_sentences_list = []
 
@@ -213,14 +221,18 @@ class SemanticChunker(BaseDocumentTransformer):
             end_index = index
 
             # Slice the sentence_dicts from the current start index to the end index
-            add_chunk(sentences, start_index, end_index + 1, chunks, self.max_chunk_size)
+            add_chunk(
+                sentences, start_index, end_index + 1, chunks, self.max_chunk_size
+            )
 
             # Update the start index for the next group
             start_index = index + 1
 
         # The last group, if any sentences remain
         if start_index < len(sentences):
-            add_chunk(sentences, start_index, len(sentences), chunks, self.max_chunk_size)
+            add_chunk(
+                sentences, start_index, len(sentences), chunks, self.max_chunk_size
+            )
 
         return chunks
 
