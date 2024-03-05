@@ -141,6 +141,7 @@ def add_chunk(sentences, start_index, end_index, chunks, max_chunk_size):
         if group:
             chunks.append(" ".join([d["sentence"] for d in group]))
 
+
 BreakpointThresholdType = Literal["percentile", "standard_deviation", "interquartile"]
 BREAKPOINT_DEFAULTS: Dict[BreakpointThresholdType, float] = {
     "percentile": 95,
