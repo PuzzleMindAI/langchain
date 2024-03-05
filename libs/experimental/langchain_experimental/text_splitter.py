@@ -93,7 +93,7 @@ def split_string(input_str, limit, sep=" "):
             "A single word exceeds the limit, making splitting impossible."
         )
 
-    # Initialize the result list, the current part being constructed, and the remaining words
+    # Create the result list, the current part being constructed, and remaining words
     res = []  # List to store the final result of split parts
     part = words[0]  # Start the first part with the first word
     others = words[1:]  # Remaining words to process
@@ -117,7 +117,7 @@ def split_string(input_str, limit, sep=" "):
 
 
 def add_chunk(sentences, start_index, end_index, chunks, max_chunk_size):
-    """Adds sentences as a chunk if their total length does not exceed max_chunk_size."""
+    """Adds sentences as a chunk if total length does not exceed max_chunk_size."""
     if not max_chunk_size:
         combined_text = " ".join(
             [d["sentence"] for d in sentences[start_index:end_index]]
