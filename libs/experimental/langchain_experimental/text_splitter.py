@@ -1,6 +1,17 @@
 import copy
 import re
-from typing import Any, Dict, Iterable, List, Literal, Optional, Sequence, Tuple, cast
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 import numpy as np
 from langchain_community.utils.math import (
@@ -83,7 +94,7 @@ def calculate_cosine_distances(sentences: List[dict]) -> Tuple[List[float], List
     return distances, sentences
 
 
-def split_string(input_str, limit, sep=" "):
+def split_string(input_str: str, limit: int, sep: str = " ") -> List[str]:
     # Split the input string into words
     words = input_str.split()
 
@@ -116,7 +127,7 @@ def split_string(input_str, limit, sep=" "):
     return res
 
 
-def add_chunk(sentences, start_index, end_index, chunks, max_chunk_size):
+def add_chunk(sentences: List[dict], start_index: int, end_index: int, chunks: List[str], max_chunk_size: Union[str, None] = None):
     """Adds sentences as a chunk if total length does not exceed max_chunk_size."""
     if not max_chunk_size:
         combined_text = " ".join(
@@ -169,7 +180,7 @@ class SemanticChunker(BaseDocumentTransformer):
         breakpoint_threshold_type: BreakpointThresholdType = "percentile",
         breakpoint_threshold_amount: Optional[float] = None,
         number_of_chunks: Optional[int] = None,
-        max_chunk_size: int = None,
+        max_chunk_size: Union[int, None] = None,
     ):
         self._add_start_index = add_start_index
         self.embeddings = embeddings
@@ -284,7 +295,7 @@ class SemanticChunker(BaseDocumentTransformer):
             i for i, x in enumerate(distances) if x > breakpoint_distance_threshold
         ]
 
-        chunks = []
+        chunks: List[str] = []
         start_index = 0
 
         # Iterate through the breakpoints to slice the sentences
