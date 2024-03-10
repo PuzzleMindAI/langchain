@@ -30,6 +30,7 @@ EXPECTED_ALL = [
     "AzureBlobStorageContainerLoader",
     "AzureBlobStorageFileLoader",
     "BSHTMLLoader",
+    "BatchLoader",
     "BibtexLoader",
     "BigQueryLoader",
     "BiliBiliLoader",
