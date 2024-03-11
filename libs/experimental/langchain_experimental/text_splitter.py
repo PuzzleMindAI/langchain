@@ -127,7 +127,13 @@ def split_string(input_str: str, limit: int, sep: str = " ") -> List[str]:
     return res
 
 
-def add_chunk(sentences: List[dict], start_index: int, end_index: int, chunks: List[str], max_chunk_size: Union[str, None] = None):
+def add_chunk(
+    sentences: List[dict],
+    start_index: int,
+    end_index: int,
+    chunks: List[str],
+    max_chunk_size: Union[str, None] = None,
+):
     """Adds sentences as a chunk if total length does not exceed max_chunk_size."""
     if not max_chunk_size:
         combined_text = " ".join(
