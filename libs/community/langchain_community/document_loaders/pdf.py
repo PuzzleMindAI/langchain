@@ -5,7 +5,7 @@ import re
 import tempfile
 import time
 from abc import ABC
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -80,7 +80,9 @@ class BasePDFLoader(BaseLoader, ABC):
         clean up the temporary file after completion.
     """
 
-    def __init__(self, file_path: str, *, headers: Optional[Dict] = None):
+    def __init__(
+        self, file_path: Union[str, BytesIO], *, headers: Optional[Dict] = None
+    ):
         """Initialize with a file path.
 
         Args:
@@ -89,9 +91,14 @@ class BasePDFLoader(BaseLoader, ABC):
         """
         self.file_path = file_path
         self.web_path = None
+        self.source_path = None
         self.headers = headers
-        if "~" in self.file_path:
-            self.file_path = os.path.expanduser(self.file_path)
+        if isinstance(file_path, BytesIO):
+            self.source_path = "bytes"
+            self.file_path = self.file_path.getvalue()
+        else:
+            if "~" in self.file_path:
+                self.file_path = os.path.expanduser(self.file_path)
 
         # If the file is a web path or S3, download it to a temporary file, and use that
         if not os.path.isfile(self.file_path) and self._is_valid_url(self.file_path):
@@ -112,8 +119,10 @@ class BasePDFLoader(BaseLoader, ABC):
                 with open(temp_pdf, mode="wb") as f:
                     f.write(r.content)
                 self.file_path = str(temp_pdf)
-        elif not os.path.isfile(self.file_path):
-            raise ValueError("File path %s is not a valid file or url" % self.file_path)
+            elif not os.path.isfile(self.file_path):
+                raise ValueError(
+                    "File path %s is not a valid file or url" % self.file_path
+                )
 
     def __del__(self) -> None:
         if hasattr(self, "temp_dir"):
@@ -167,7 +176,7 @@ class PyPDFLoader(BasePDFLoader):
 
     def __init__(
         self,
-        file_path: str,
+        file_path: Union[str, BytesIO],
         password: Optional[Union[str, bytes]] = None,
         headers: Optional[Dict] = None,
         extract_images: bool = False,
@@ -188,6 +197,8 @@ class PyPDFLoader(BasePDFLoader):
         """Lazy load given path as pages."""
         if self.web_path:
             blob = Blob.from_data(open(self.file_path, "rb").read(), path=self.web_path)
+        elif self.source_path:
+            blob = Blob.from_data(self.file_path, path=self.source_path)
         else:
             blob = Blob.from_path(self.file_path)
         yield from self.parser.parse(blob)
@@ -213,6 +224,8 @@ class PyPDFium2Loader(BasePDFLoader):
         """Lazy load given path as pages."""
         if self.web_path:
             blob = Blob.from_data(open(self.file_path, "rb").read(), path=self.web_path)
+        elif self.source_path:
+            blob = Blob.from_data(self.file_path, path=self.source_path)
         else:
             blob = Blob.from_path(self.file_path)
         yield from self.parser.parse(blob)
@@ -302,6 +315,8 @@ class PDFMinerLoader(BasePDFLoader):
         """Lazily load documents."""
         if self.web_path:
             blob = Blob.from_data(open(self.file_path, "rb").read(), path=self.web_path)
+        elif self.source_path:
+            blob = Blob.from_data(self.file_path, path=self.source_path)
         else:
             blob = Blob.from_path(self.file_path)
         yield from self.parser.parse(blob)
@@ -379,6 +394,8 @@ class PyMuPDFLoader(BasePDFLoader):
         )
         if self.web_path:
             blob = Blob.from_data(open(self.file_path, "rb").read(), path=self.web_path)
+        elif self.source_path:
+            blob = Blob.from_data(self.file_path, path=self.source_path)
         else:
             blob = Blob.from_path(self.file_path)
         yield from parser.lazy_parse(blob)
@@ -575,6 +592,8 @@ class PDFPlumberLoader(BasePDFLoader):
         )
         if self.web_path:
             blob = Blob.from_data(open(self.file_path, "rb").read(), path=self.web_path)
+        elif self.source_path:
+            blob = Blob.from_data(self.file_path, path=self.source_path)
         else:
             blob = Blob.from_path(self.file_path)
         return parser.parse(blob)
