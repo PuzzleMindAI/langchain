@@ -133,7 +133,7 @@ def add_chunk(
     start_index: int,
     end_index: int,
     chunks: List[str],
-    max_chunk_size: Union[str, None] = None,
+    max_chunk_size: Optional[int] = None,
 ):
     """Adds sentences as a chunk if total length does not exceed max_chunk_size."""
     if not max_chunk_size:
@@ -188,7 +188,7 @@ class SemanticChunker(BaseDocumentTransformer):
         breakpoint_threshold_type: BreakpointThresholdType = "percentile",
         breakpoint_threshold_amount: Optional[float] = None,
         number_of_chunks: Optional[int] = None,
-        max_chunk_size: Union[int, None] = None,
+        max_chunk_size: Optional[int] = None,
     ):
         self._add_start_index = add_start_index
         self.embeddings = embeddings
