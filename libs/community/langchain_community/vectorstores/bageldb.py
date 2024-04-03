@@ -44,7 +44,7 @@ def _results_to_docs_and_scores(results: Any) -> List[Tuple[Document, float]]:
 class Bagel(VectorStore):
     """``BagelDB.ai`` vector store.
 
-    To use, you should have the ``betabageldb`` python package installed.
+    To use, you should have the ``bagelML`` python package installed.
 
     Example:
         .. code-block:: python
@@ -69,7 +69,7 @@ class Bagel(VectorStore):
             import bagel
             import bagel.config
         except ImportError:
-            raise ImportError("Please install bagel `pip install betabageldb`.")
+            raise ImportError("Please install bagel `pip install bagelML`.")
         if client is not None:
             self._client_settings = client_settings
             self._client = client
@@ -108,7 +108,7 @@ class Bagel(VectorStore):
         try:
             import bagel  # noqa: F401
         except ImportError:
-            raise ImportError("Please install bagel `pip install betabageldb`.")
+            raise ImportError("Please install bagel `pip install bagelML`.")
 
         if self._embedding_function and query_embeddings is None and query_texts:
             texts = list(query_texts)
