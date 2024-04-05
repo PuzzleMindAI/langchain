@@ -35,7 +35,7 @@ _module_lookup = {
     "AzureSearch": "langchain_community.vectorstores.azuresearch",
     "BaiduVectorDB": "langchain_community.vectorstores.baiduvectordb",
     "BESVectorStore": "langchain_community.vectorstores.baiducloud_vector_search",
-    "Bagel": "langchain_community.vectorstores.bageldb",
+    "Bagel": "langchain_community.vectorstores.bagel",
     "BigQueryVectorSearch": "langchain_community.vectorstores.bigquery_vector_search",
     "Cassandra": "langchain_community.vectorstores.cassandra",
     "Chroma": "langchain_community.vectorstores.chroma",

@@ -42,7 +42,7 @@ def _results_to_docs_and_scores(results: Any) -> List[Tuple[Document, float]]:
 
 
 class Bagel(VectorStore):
-    """``BagelDB.ai`` vector store.
+    """``Bagel.net`` Inference platform.
 
     To use, you should have the ``bagelML`` python package installed.
 
@@ -104,7 +104,7 @@ class Bagel(VectorStore):
         where: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> List[Document]:
-        """Query the BagelDB cluster based on the provided parameters."""
+        """Query the Bagel cluster based on the provided parameters."""
         try:
             import bagel  # noqa: F401
         except ImportError:
@@ -133,7 +133,7 @@ class Bagel(VectorStore):
     ) -> List[str]:
         """
         Add texts along with their corresponding embeddings and optional
-        metadata to the BagelDB cluster.
+        metadata to the Bagel cluster.
 
         Args:
             texts (Iterable[str]): Texts to be added.
@@ -204,7 +204,7 @@ class Bagel(VectorStore):
         **kwargs: Any,
     ) -> List[Document]:
         """
-        Run a similarity search with BagelDB.
+        Run a similarity search with Bagel.
 
         Args:
             query (str): The query text to search for similar documents/texts.
@@ -226,7 +226,7 @@ class Bagel(VectorStore):
         **kwargs: Any,
     ) -> List[Tuple[Document, float]]:
         """
-        Run a similarity search with BagelDB and return documents with their
+        Run a similarity search with Bagel and return documents with their
         corresponding similarity scores.
 
         Args:
@@ -262,7 +262,7 @@ class Bagel(VectorStore):
 
         Args:
             texts (List[str]): List of text content to be added.
-            cluster_name (str): The name of the BagelDB cluster.
+            cluster_name (str): The name of the Bagel cluster.
             client_settings (Optional[bagel.config.Settings]): Client settings.
             cluster_metadata (Optional[Dict]): Metadata of the cluster.
             embeddings (Optional[Embeddings]): List of embedding.
@@ -321,7 +321,7 @@ class Bagel(VectorStore):
     def _select_relevance_score_fn(self) -> Callable[[float], float]:
         """
         Select and return the appropriate relevance score function based
-        on the distance metric used in the BagelDB cluster.
+        on the distance metric used in the Bagel cluster.
         """
         if self.override_relevance_score_fn:
             return self.override_relevance_score_fn
@@ -366,7 +366,7 @@ class Bagel(VectorStore):
                                         Bagel vectorstore.
             embedding (Optional[List[float]]): List of embedding.
             ids (Optional[List[str]]): List of IDs. Defaults to None.
-            cluster_name (str): The name of the BagelDB cluster.
+            cluster_name (str): The name of the Bagel cluster.
             client_settings (Optional[bagel.config.Settings]): Client settings.
             client (Optional[bagel.Client]): Bagel client instance.
             cluster_metadata (Optional[Dict]): Metadata associated with the
