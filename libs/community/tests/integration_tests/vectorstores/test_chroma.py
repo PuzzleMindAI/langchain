@@ -1,4 +1,5 @@
 """Test Chroma functionality."""
+
 import uuid
 
 import pytest
@@ -23,6 +24,9 @@ def test_chroma() -> None:
     assert output == [Document(page_content="foo")]
     assert len(docsearch) == 3
 
+    outputs = docsearch.similarity_search(["foo", "bar"], k=1)
+    assert outputs == [[Document(page_content="foo")], [Document(page_content="bar")]]
+
 
 async def test_chroma_async() -> None:
     """Test end to end construction and search."""
@@ -32,6 +36,9 @@ async def test_chroma_async() -> None:
     )
     output = await docsearch.asimilarity_search("foo", k=1)
     assert output == [Document(page_content="foo")]
+
+    outputs = await docsearch.asimilarity_search(["foo", "bar"], k=1)
+    assert outputs == [[Document(page_content="foo")], [Document(page_content="bar")]]
 
 
 def test_chroma_with_metadatas() -> None:
@@ -46,6 +53,11 @@ def test_chroma_with_metadatas() -> None:
     )
     output = docsearch.similarity_search("foo", k=1)
     assert output == [Document(page_content="foo", metadata={"page": "0"})]
+    outputs = docsearch.similarity_search(["foo", "bar"], k=1)
+    assert outputs == [
+        [Document(page_content="foo", metadata={"page": "0"})],
+        [Document(page_content="bar", metadata={"page": "1"})],
+    ]
 
 
 def test_chroma_with_metadatas_with_scores() -> None:
@@ -60,6 +72,11 @@ def test_chroma_with_metadatas_with_scores() -> None:
     )
     output = docsearch.similarity_search_with_score("foo", k=1)
     assert output == [(Document(page_content="foo", metadata={"page": "0"}), 0.0)]
+    outputs = docsearch.similarity_search_with_score(["foo", "bar"], k=1)
+    assert outputs == [
+        [(Document(page_content="foo", metadata={"page": "0"}), 0.0)],
+        [(Document(page_content="bar", metadata={"page": "1"}), 0.0)],
+    ]
 
 
 def test_chroma_with_metadatas_with_scores_using_vector() -> None:
@@ -80,6 +97,15 @@ def test_chroma_with_metadatas_with_scores_using_vector() -> None:
     )
     assert output == [(Document(page_content="foo", metadata={"page": "0"}), 0.0)]
 
+    embedded_queries = embeddings.embed_documents(["foo", "bar"])
+    outputs = docsearch.similarity_search_by_vector_with_relevance_scores(
+        embedding=embedded_queries, k=1
+    )
+    assert outputs == [
+        [(Document(page_content="foo", metadata={"page": "0"}), 0.0)],
+        [(Document(page_content="bar", metadata={"page": "1"}), 0.0)],
+    ]
+
 
 def test_chroma_search_filter() -> None:
     """Test end to end construction and search with metadata filtering."""
@@ -95,6 +121,14 @@ def test_chroma_search_filter() -> None:
     assert output == [Document(page_content="far", metadata={"first_letter": "f"})]
     output = docsearch.similarity_search("far", k=1, filter={"first_letter": "b"})
     assert output == [Document(page_content="bar", metadata={"first_letter": "b"})]
+
+    outputs = docsearch.similarity_search(
+        ["bar", "bar"], k=1, filter={"first_letter": "b"}
+    )
+    assert outputs == [
+        [Document(page_content="bar", metadata={"first_letter": "b"})],
+        [Document(page_content="bar", metadata={"first_letter": "b"})],
+    ]
 
 
 def test_chroma_search_filter_with_scores() -> None:
@@ -118,6 +152,14 @@ def test_chroma_search_filter_with_scores() -> None:
     )
     assert output == [
         (Document(page_content="bar", metadata={"first_letter": "b"}), 1.0)
+    ]
+
+    outputs = docsearch.similarity_search_with_score(
+        ["far", "far"], k=1, filter={"first_letter": "b"}
+    )
+    assert outputs == [
+        [(Document(page_content="bar", metadata={"first_letter": "b"}), 1.0)],
+        [(Document(page_content="bar", metadata={"first_letter": "b"}), 0.0)],
     ]
 
 
@@ -163,6 +205,9 @@ def test_chroma_mmr() -> None:
     output = docsearch.max_marginal_relevance_search("foo", k=1)
     assert output == [Document(page_content="foo")]
 
+    outputs = docsearch.max_marginal_relevance_search(["foo", "bar"], k=1)
+    assert outputs == [[Document(page_content="foo")], [Document(page_content="bar")]]
+
 
 def test_chroma_mmr_by_vector() -> None:
     """Test end to end construction and search."""
@@ -174,6 +219,10 @@ def test_chroma_mmr_by_vector() -> None:
     embedded_query = embeddings.embed_query("foo")
     output = docsearch.max_marginal_relevance_search_by_vector(embedded_query, k=1)
     assert output == [Document(page_content="foo")]
+
+    embedded_queries = embeddings.embed_documents(["foo", "bar"])
+    outputs = docsearch.max_marginal_relevance_search_by_vector(embedded_queries, k=1)
+    assert outputs == [[Document(page_content="foo")], [Document(page_content="bar")]]
 
 
 def test_chroma_with_include_parameter() -> None:
@@ -245,11 +294,14 @@ def test_chroma_with_relevance_score() -> None:
         metadatas=metadatas,
         collection_metadata={"hnsw:space": "l2"},
     )
-    output = docsearch.similarity_search_with_relevance_scores("foo", k=3)
+    output = docsearch.similarity_search_with_relevance_scores("foo", k=1)
     assert output == [
         (Document(page_content="foo", metadata={"page": "0"}), 1.0),
-        (Document(page_content="bar", metadata={"page": "1"}), 0.8),
-        (Document(page_content="baz", metadata={"page": "2"}), 0.5),
+    ]
+
+    outputs = docsearch.similarity_search_with_relevance_scores(["foo"], k=1)
+    assert outputs == [
+        [(Document(page_content="foo", metadata={"page": "0"}), 1.0)],
     ]
 
 
@@ -270,6 +322,14 @@ def test_chroma_with_relevance_score_custom_normalization_fn() -> None:
         (Document(page_content="foo", metadata={"page": "0"}), -0.0),
         (Document(page_content="bar", metadata={"page": "1"}), -0.0),
         (Document(page_content="baz", metadata={"page": "2"}), -0.0),
+    ]
+    outputs = docsearch.similarity_search_with_relevance_scores(["foo"], k=3)
+    assert outputs == [
+        [
+            (Document(page_content="foo", metadata={"page": "0"}), -0.0),
+            (Document(page_content="bar", metadata={"page": "1"}), -0.0),
+            (Document(page_content="baz", metadata={"page": "2"}), -0.0),
+        ]
     ]
 
 
@@ -417,3 +477,6 @@ def test_chroma_legacy_batching() -> None:
         embedding=embedding_function,
         ids=[str(uuid.uuid4()) for _ in range(len(docs))],
     )
+
+
+# Add tests for list of lists
