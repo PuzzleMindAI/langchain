@@ -99,6 +99,7 @@ _module_lookup = {
     "OpenAICallbackHandler": "langchain_community.callbacks.openai_info",
     "PromptLayerCallbackHandler": "langchain_community.callbacks.promptlayer_callback",
     "SageMakerCallbackHandler": "langchain_community.callbacks.sagemaker_callback",
+    "StreamingAmazonAPIGatewayWebSocketCallbackHandler": "langchain_community.callbacks.amazon_apigateway",  # noqa: E501
     "StreamlitCallbackHandler": "langchain_community.callbacks.streamlit",
     "TrubricsCallbackHandler": "langchain_community.callbacks.trubrics_callback",
     "WandbCallbackHandler": "langchain_community.callbacks.wandb_callback",
