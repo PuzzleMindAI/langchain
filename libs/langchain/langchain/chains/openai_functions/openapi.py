@@ -21,7 +21,7 @@ from langchain.chains.sequential import SequentialChain
 from langchain.tools import APIOperation
 
 if TYPE_CHECKING:
-    from openapi_pydantic import Parameter
+    from openapi_pydantic import Parameter, Reference
 
 
 def _get_description(o: Any, prefer_short: bool) -> Optional[str]:
@@ -135,7 +135,15 @@ def openapi_spec_to_openai_fn(
                 media_types = {}
                 for media_type, media_type_object in request_body.content.items():
                     if media_type_object.media_type_schema:
-                        schema = spec.get_schema(media_type_object.media_type_schema)
+                        if isinstance(media_type_object.media_type_schema, Reference):
+                            schema = spec._get_root_referenced_schema(
+                                media_type_object.media_type_schema
+                            )
+                        else:
+                            schema = spec.get_schema(
+                                media_type_object.media_type_schema
+                            )
+
                         media_types[media_type] = json.loads(
                             schema.json(exclude_none=True)
                         )
