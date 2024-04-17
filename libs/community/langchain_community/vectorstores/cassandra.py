@@ -52,13 +52,6 @@ class Cassandra(VectorStore):
 
     _embedding_dimension: Union[int, None]
 
-    @staticmethod
-    def _filter_to_metadata(filter_dict: Optional[Dict[str, str]]) -> Dict[str, Any]:
-        if filter_dict is None:
-            return {}
-        else:
-            return filter_dict
-
     def _get_embedding_dimension(self) -> int:
         if self._embedding_dimension is None:
             self._embedding_dimension = len(
@@ -73,6 +66,8 @@ class Cassandra(VectorStore):
         keyspace: str,
         table_name: str,
         ttl_seconds: Optional[int] = None,
+        *,
+        body_index_options: Optional[List[Tuple[str, Any]]] = None,
     ) -> None:
         try:
             from cassio.table import MetadataVectorCassandraTable
@@ -90,6 +85,10 @@ class Cassandra(VectorStore):
         #
         self._embedding_dimension = None
         #
+        kwargs = {}
+        if body_index_options is not None:
+            kwargs["body_index_options"] = body_index_options
+
         self.table = MetadataVectorCassandraTable(
             session=session,
             keyspace=keyspace,
@@ -97,6 +96,7 @@ class Cassandra(VectorStore):
             vector_dimension=self._get_embedding_dimension(),
             metadata_indexing="all",
             primary_key_type="TEXT",
+            **kwargs,
         )
 
     @property
@@ -209,22 +209,30 @@ class Cassandra(VectorStore):
         embedding: List[float],
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
     ) -> List[Tuple[Document, float, str]]:
         """Return docs most similar to embedding vector.
 
         Args:
-            embedding (str): Embedding to look up documents similar to.
-            k (int): Number of Documents to return. Defaults to 4.
+            embedding: Embedding to look up documents similar to.
+            k: Number of Documents to return. Defaults to 4.
+            filter: Filter on the metadata to apply.
+            body_search: Document textual search terms to apply.
+                Only supported by Astra DB at the moment.
         Returns:
             List of (Document, score, id), the most similar to the query vector.
         """
-        search_metadata = self._filter_to_metadata(filter)
+        kwargs: Dict[str, Any] = {}
+        if filter is not None:
+            kwargs["metadata"] = filter
+        if body_search is not None:
+            kwargs["body_search"] = body_search
         #
         hits = self.table.metric_ann_search(
             vector=embedding,
             n=k,
             metric="cos",
-            metadata=search_metadata,
+            **kwargs,
         )
         # We stick to 'cos' distance as it can be normalized on a 0-1 axis
         # (1=most relevant), as required by this class' contract.
@@ -245,12 +253,14 @@ class Cassandra(VectorStore):
         query: str,
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
     ) -> List[Tuple[Document, float, str]]:
         embedding_vector = self.embedding.embed_query(query)
         return self.similarity_search_with_score_id_by_vector(
             embedding=embedding_vector,
             k=k,
             filter=filter,
+            body_search=body_search,
         )
 
     # id-unaware search facilities
@@ -259,12 +269,16 @@ class Cassandra(VectorStore):
         embedding: List[float],
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
     ) -> List[Tuple[Document, float]]:
         """Return docs most similar to embedding vector.
 
         Args:
-            embedding (str): Embedding to look up documents similar to.
-            k (int): Number of Documents to return. Defaults to 4.
+            embedding: Embedding to look up documents similar to.
+            k: Number of Documents to return. Defaults to 4.
+            filter: Filter on the metadata to apply.
+            body_search: Document textual search terms to apply.
+                Only supported by Astra DB at the moment.
         Returns:
             List of (Document, score), the most similar to the query vector.
         """
@@ -274,6 +288,7 @@ class Cassandra(VectorStore):
                 embedding=embedding,
                 k=k,
                 filter=filter,
+                body_search=body_search,
             )
         ]
 
@@ -282,6 +297,7 @@ class Cassandra(VectorStore):
         query: str,
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
         **kwargs: Any,
     ) -> List[Document]:
         embedding_vector = self.embedding.embed_query(query)
@@ -289,6 +305,7 @@ class Cassandra(VectorStore):
             embedding_vector,
             k,
             filter=filter,
+            body_search=body_search,
         )
 
     def similarity_search_by_vector(
@@ -296,6 +313,7 @@ class Cassandra(VectorStore):
         embedding: List[float],
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
         **kwargs: Any,
     ) -> List[Document]:
         return [
@@ -304,6 +322,7 @@ class Cassandra(VectorStore):
                 embedding,
                 k,
                 filter=filter,
+                body_search=body_search,
             )
         ]
 
@@ -312,12 +331,14 @@ class Cassandra(VectorStore):
         query: str,
         k: int = 4,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
     ) -> List[Tuple[Document, float]]:
         embedding_vector = self.embedding.embed_query(query)
         return self.similarity_search_with_score_by_vector(
             embedding_vector,
             k,
             filter=filter,
+            body_search=body_search,
         )
 
     def max_marginal_relevance_search_by_vector(
@@ -327,6 +348,7 @@ class Cassandra(VectorStore):
         fetch_k: int = 20,
         lambda_mult: float = 0.5,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
         **kwargs: Any,
     ) -> List[Document]:
         """Return docs selected using the maximal marginal relevance.
@@ -339,17 +361,24 @@ class Cassandra(VectorStore):
             lambda_mult: Number between 0 and 1 that determines the degree
                         of diversity among the results with 0 corresponding
                         to maximum diversity and 1 to minimum diversity.
+            filter: Filter on the metadata to apply.
+            body_search: Document textual search terms to apply.
+                Only supported by Astra DB at the moment.
         Returns:
             List of Documents selected by maximal marginal relevance.
         """
-        search_metadata = self._filter_to_metadata(filter)
+        _kwargs: Dict[str, Any] = {}
+        if filter is not None:
+            _kwargs["metadata"] = filter
+        if body_search is not None:
+            _kwargs["body_search"] = body_search
 
         prefetch_hits = list(
             self.table.metric_ann_search(
                 vector=embedding,
                 n=fetch_k,
                 metric="cos",
-                metadata=search_metadata,
+                **_kwargs,
             )
         )
         # let the mmr utility pick the *indices* in the above array
@@ -379,6 +408,7 @@ class Cassandra(VectorStore):
         fetch_k: int = 20,
         lambda_mult: float = 0.5,
         filter: Optional[Dict[str, str]] = None,
+        body_search: Optional[Union[str, List[str]]] = None,
         **kwargs: Any,
     ) -> List[Document]:
         """Return docs selected using the maximal marginal relevance.
@@ -392,6 +422,9 @@ class Cassandra(VectorStore):
                         of diversity among the results with 0 corresponding
                         to maximum diversity and 1 to minimum diversity.
                         Optional.
+            filter: Filter on the metadata to apply.
+            body_search: Document textual search terms to apply.
+                Only supported by Astra DB at the moment.
         Returns:
             List of Documents selected by maximal marginal relevance.
         """
@@ -402,6 +435,7 @@ class Cassandra(VectorStore):
             fetch_k,
             lambda_mult=lambda_mult,
             filter=filter,
+            body_search=body_search,
         )
 
     @classmethod
@@ -410,7 +444,9 @@ class Cassandra(VectorStore):
         texts: List[str],
         embedding: Embeddings,
         metadatas: Optional[List[dict]] = None,
+        *,
         batch_size: int = 16,
+        body_index_options: Optional[List[Tuple[str, Any]]] = None,
         **kwargs: Any,
     ) -> CVST:
         """Create a Cassandra vectorstore from raw texts.
@@ -428,6 +464,7 @@ class Cassandra(VectorStore):
             session=session,
             keyspace=keyspace,
             table_name=table_name,
+            body_index_options=body_index_options,
         )
         cassandraStore.add_texts(texts=texts, metadatas=metadatas)
         return cassandraStore
@@ -437,7 +474,9 @@ class Cassandra(VectorStore):
         cls: Type[CVST],
         documents: List[Document],
         embedding: Embeddings,
+        *,
         batch_size: int = 16,
+        body_index_options: Optional[List[Tuple[str, Any]]] = None,
         **kwargs: Any,
     ) -> CVST:
         """Create a Cassandra vectorstore from a document list.
@@ -459,4 +498,5 @@ class Cassandra(VectorStore):
             session=session,
             keyspace=keyspace,
             table_name=table_name,
+            body_index_options=body_index_options,
         )
