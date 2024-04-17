@@ -1,12 +1,19 @@
 """Tool for the Google search API."""
 
-from typing import Optional
+from typing import Optional, Type
 
 from langchain_core._api.deprecation import deprecated
 from langchain_core.callbacks import CallbackManagerForToolRun
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 
 from langchain_community.utilities.google_search import GoogleSearchAPIWrapper
+
+
+class GoogleSearchRunInput(BaseModel):
+    """Input for the GoogleSearchRun tool."""
+
+    query: str = Field(description="Query for Google Search")
 
 
 @deprecated(
@@ -24,6 +31,7 @@ class GoogleSearchRun(BaseTool):
         "Input should be a search query."
     )
     api_wrapper: GoogleSearchAPIWrapper
+    args_schema: Type[BaseModel] = GoogleSearchRunInput
 
     def _run(
         self,

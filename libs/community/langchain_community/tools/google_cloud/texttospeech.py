@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import tempfile
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 from langchain_core._api.deprecation import deprecated
 from langchain_core.callbacks import CallbackManagerForToolRun
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 
 from langchain_community.utilities.vertexai import get_client_info
@@ -37,6 +38,27 @@ def _encoding_file_extension_map(encoding: texttospeech.AudioEncoding) -> Option
     return ENCODING_FILE_EXTENSION_MAP.get(encoding)
 
 
+class GoogleCloudTextToSpeechToolInput(BaseModel):
+    """Input for the GoogleCloudTextToSpeechTool tool."""
+
+    input_text: str = Field(description="Text that needs to be converted to speech")
+    language_code: str = Field(
+        description="""Language Code to be 
+                               used for GoogleCloudTextToSpeech""",
+        default="en-US",
+    )
+    ssml_gender: Optional[texttospeech.SsmlVoiceGender] = Field(
+        description="""
+                                            SSML Gender to be used""",
+        default=None,
+    )
+    audio_encoding: Optional[texttospeech.AudioEncoding] = Field(
+        description="""
+                                    Audio Encoding to be used""",
+        default=None,
+    )
+
+
 @deprecated(
     since="0.0.33",
     removal="0.2.0",
@@ -58,6 +80,7 @@ class GoogleCloudTextToSpeechTool(BaseTool):
     )
 
     _client: Any
+    args_schema: Type[BaseModel] = GoogleCloudTextToSpeechToolInput
 
     def __init__(self, **kwargs: Any) -> None:
         """Initializes private fields."""

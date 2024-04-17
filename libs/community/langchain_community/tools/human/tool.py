@@ -1,15 +1,21 @@
 """Tool for asking human input."""
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Type
 
 from langchain_core.callbacks import CallbackManagerForToolRun
-from langchain_core.pydantic_v1 import Field
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 
 
 def _print_func(text: str) -> None:
     print("\n")  # noqa: T201
     print(text)  # noqa: T201
+
+
+class HumanInputRunInput(BaseModel):
+    """Input for the HumanInputRunInput tool."""
+
+    query: str = Field(description="Human Input")
 
 
 class HumanInputRun(BaseTool):
@@ -23,6 +29,7 @@ class HumanInputRun(BaseTool):
     )
     prompt_func: Callable[[str], None] = Field(default_factory=lambda: _print_func)
     input_func: Callable = Field(default_factory=lambda: input)
+    args_schema: Type[BaseModel] = HumanInputRunInput
 
     def _run(
         self,
