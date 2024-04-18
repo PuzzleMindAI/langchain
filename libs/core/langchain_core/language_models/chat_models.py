@@ -52,7 +52,6 @@ from langchain_core.outputs import (
 from langchain_core.prompt_values import ChatPromptValue, PromptValue, StringPromptValue
 from langchain_core.pydantic_v1 import Field, root_validator
 from langchain_core.runnables.config import ensure_config, run_in_executor
-from langchain_core.tracers.log_stream import LogStreamCallbackHandler
 
 if TYPE_CHECKING:
     from langchain_core.pydantic_v1 import BaseModel
@@ -601,6 +600,9 @@ class BaseChatModel(BaseLanguageModel[BaseMessage], ABC):
                 )
         # If stream is not explicitly set, check if implicitly requested by
         # astream_events() or astream_log(). Bail out if _stream not implemented
+
+        from langchain_core.tracers.log_stream import LogStreamCallbackHandler
+
         if type(self)._stream != BaseChatModel._stream and kwargs.pop(
             "stream",
             (
@@ -681,6 +683,9 @@ class BaseChatModel(BaseLanguageModel[BaseMessage], ABC):
                 )
         # If stream is not explicitly set, check if implicitly requested by
         # astream_events() or astream_log(). Bail out if _astream not implemented
+
+        from langchain_core.tracers.log_stream import LogStreamCallbackHandler
+
         if (
             type(self)._astream != BaseChatModel._astream
             or type(self)._stream != BaseChatModel._stream
