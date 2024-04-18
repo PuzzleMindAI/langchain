@@ -360,6 +360,7 @@ _module_lookup = {
     "TitanTakeoffEmbed": "langchain_community.embeddings.titan_takeoff",
     "PremAIEmbeddings": "langchain_community.embeddings.premai",
     "YandexGPTEmbeddings": "langchain_community.embeddings.yandex",
+    "AscendEmbeddings": "langchain_community.embeddings.ascend",
 }
 
 
