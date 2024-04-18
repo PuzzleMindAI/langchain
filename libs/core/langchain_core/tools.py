@@ -901,6 +901,7 @@ def tool(
                     "Function must have a docstring if "
                     "description not provided and infer_schema is False."
                 )
+
             return Tool(
                 name=tool_name,
                 func=func,
