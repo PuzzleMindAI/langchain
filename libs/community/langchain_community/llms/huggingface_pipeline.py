@@ -110,7 +110,7 @@ class HuggingFacePipeline(BaseLLM):
                         raise ValueError(
                             "Could not import optimum-intel python package. "
                             "Please install it with: "
-                            "pip install 'optimum[openvino,nncf]' "
+                            "pip install `optimum[openvino,nncf]` "
                         )
                     try:
                         # use local model
@@ -136,7 +136,7 @@ class HuggingFacePipeline(BaseLLM):
                         raise ValueError(
                             "Could not import optimum-intel python package. "
                             "Please install it with: "
-                            "pip install 'optimum[openvino,nncf]' "
+                            "pip install `optimum[openvino,nncf]` "
                         )
                     try:
                         # use local model
@@ -206,7 +206,7 @@ class HuggingFacePipeline(BaseLLM):
                     cuda_device_count,
                 )
         if device is not None and device_map is not None and backend == "openvino":
-            logger.warning("Please set device for OpenVINO through: " "'model_kwargs'")
+            logger.warning("Please set device for OpenVINO through: `model_kwargs`")
         if "trust_remote_code" in _model_kwargs:
             _model_kwargs = {
                 k: v for k, v in _model_kwargs.items() if k != "trust_remote_code"
@@ -258,7 +258,7 @@ class HuggingFacePipeline(BaseLLM):
     ) -> LLMResult:
         # List to hold all results
         text_generations: List[str] = []
-        pipeline_kwargs = kwargs.get("pipeline_kwargs", {})
+        pipeline_kwargs = self.pipeline_kwargs or kwargs.get("pipeline_kwargs", {})
 
         for i in range(0, len(prompts), self.batch_size):
             batch_prompts = prompts[i : i + self.batch_size]
